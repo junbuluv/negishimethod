@@ -54,53 +54,37 @@ dif = Inf;
 while dif > tol_search 
 
 [err,coef] = model_error(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
-[err_a,~] = model_error(a,coef,kgrid,param,T,psi,update,tol,idx_psi);
+[err_b,~] = model_error(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
     if err == tol_search
        return
-    elseif sign(err) == sign(err_a)
-        a = lambda;
-    else
+    elseif sign(err) == sign(err_b)
         b = lambda;
+    else
+        a = lambda;
     end
 
     lambda = (a+b)/2;
-    dif = abs(err - err_a)
+    dif = abs(err - err_b)
     iter = iter +1;
     
 end
 
-
-
-
-
-c1_sim = zeros(T,1);
-c2_sim = zeros(T,1);
-k_sim = zeros(T,1);
+sim_length = 20;
+c1_sim = zeros(sim_length,1);
+c2_sim = zeros(sim_length,1);
+k_sim = zeros(sim_length,1);
 k_sim(1,1) = 0.8 * kss;
-n1_sim = 1/2;
-w_sim = zeros(T,1);
-r_sim = zeros(T,1);
-denum = zeros(T,1);
-p = zeros(T,1);
-ltbc = zeros(T,1);
 
-for t = 1:T
+for t = 1:sim_length
     c1_sim(t) = coef(1) + coef(2)*k_sim(t);
     c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma) )^(-1/gamma);
     k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
-    w_sim(t) = (1-alpha)*k_sim(t)^(alpha)*(1/2)^(-alpha);
-    r_sim(t) = alpha*k_sim(t)^(alpha-1)*(1/2)^(1-alpha);
-    denum(t) = 1/(1-r_sim(t) + delta) ;
-    p(1) = denum(1);
-    for z = 1:T
-    p(z+1) = p(z)*denum(t);
-    end
-    ltbc(t) = p(t)*(c1_sim(t) - w_sim(t)*(n1_sim));
 end
 
 
-
-
-
+hold on
+plot(sim_length, c1_sim)
+plot(sim_length, c2_sim)
+hold off
 
 
