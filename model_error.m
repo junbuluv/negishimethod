@@ -60,7 +60,7 @@ ltbc = zeros(T,1);
 
 for t = 1:T
     c1_sim(t) = coef(1) + coef(2)*k_sim(t);
-    c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma) )^(-1/gamma);
+    c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma))^(-1/gamma);
     k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
     w_sim(t) = (1-alpha)*k_sim(t)^(alpha)*(nss)^(-alpha);
     r_sim(t) = alpha*k_sim(t)^(alpha-1)*(nss)^(1-alpha);

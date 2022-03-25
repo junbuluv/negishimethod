@@ -21,7 +21,7 @@ param = struct("nss",nss,"kss",kss,"yss",yss,"css",css,"delta",delta, "beta", be
 
 %% psi
 psi = [0.2,0.5,0.7,0.9];
-idx_psi = 1;
+idx_psi = 3;
 
 %% Negishi problem
 T = 2500;
@@ -47,35 +47,37 @@ tol = 1e-5;
 % initialize lambda
 
 iter = 0;
-tol_search = 1e-5;
+tol_search = 1e-7;
 dif = Inf;
-while dif > tol_search 
+err_dif = Inf;
+while dif > tol_search
 
 [err,coef] = model_error(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
 [err_b,~] = model_error(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
-    if err == tol_search
+    if abs(err) < tol_search
        return
     elseif sign(err) == sign(err_b)
         b = lambda;
     else
         a = lambda;
     end
-
     lambda = (a+b)/2;
     dif = abs(err - err_b)
     iter = iter +1;
     
 end
 
-sim_length = 20;
+
+
+sim_length = 2500;
 c1_sim = zeros(sim_length,1);
 c2_sim = zeros(sim_length,1);
 k_sim = zeros(sim_length,1);
-k_sim(1,1) = 0.8 * kss;
+k_sim(1,1) = kss;
 
 for t = 1:sim_length
     c1_sim(t) = coef(1) + coef(2)*k_sim(t);
-    c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma) )^(-1/gamma);
+    c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma))^(-1/gamma);
     k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
 end
 
