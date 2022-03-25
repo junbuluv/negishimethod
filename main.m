@@ -26,8 +26,6 @@ idx_psi = 1;
 %% Negishi problem
 T = 2500;
 
-
-
 a = 0.01;
 b = 0.99;
 lambda = a+b/2;
@@ -83,8 +81,8 @@ end
 
 
 hold on
-plot(sim_length, c1_sim)
-plot(sim_length, c2_sim)
+plot(c1_sim)
+plot(c2_sim)
 hold off
 
 
