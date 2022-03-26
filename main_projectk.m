@@ -21,7 +21,7 @@ param = struct("nss",nss,"kss",kss,"yss",yss,"css",css,"delta",delta, "beta", be
 
 %% psi
 psi = [0.2,0.5,0.7,0.9];
-idx_psi = 3;
+idx_psi = 1;
 
 %% Negishi problem
 T = 2500;
@@ -38,7 +38,7 @@ kgrid = linspace(k_low,k_high,T)';
 
 
 %% parametrize c1 using k
-coef = [c01_ss; 0.0001];
+coef = [log(c01_ss^(-gamma)); 0.0001 ];
 %% bound and update parameter
 update = 0.6;
 tol = 1e-5;
@@ -47,15 +47,15 @@ tol = 1e-5;
 % initialize lambda
 
 iter = 0;
-tol_search = 5.4e-05;
+tol_search = 1e-7;
 dif = Inf;
 err_dif = Inf;
 
 
-while err_dif > tol_search || dif > tol_search
+while dif > tol_search
 
-[err,coef] = model_error(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
-[err_b,~] = model_error(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
+[err,coef] = project_k(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
+[err_b,~] = project_k(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
     if abs(err) < tol_search
        return
     elseif sign(err) == sign(err_b)
@@ -64,24 +64,23 @@ while err_dif > tol_search || dif > tol_search
         a = lambda;
     end
     lambda = (a+b)/2;
-    dif = abs(err-err_b)
-    err_dif = abs(err)
+    dif = abs(err - err_b)
     iter = iter +1;
     
 end
 
 
 
-sim_length = 500;
+sim_length = 200;
 c1_sim = zeros(sim_length,1);
 c2_sim = zeros(sim_length,1);
-k_sim = zeros(sim_length,1);
-k_sim(1,1) = 0.8*kss;
-
+k_sim = kgrid;
+k_sim(1,1) = 0.8* kss;
+kp_sim  = zeros(sim_length,1);
 for t = 1:sim_length
-    c1_sim(t) = coef(1) + coef(2)*k_sim(t);
-    c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma))^(-1/gamma);
-    k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
+    kp_sim(t) = exp(coef(1) + coef(2)*log(k_sim(t)));
+    c2_sim(t) = (1/(1+((1-lambda)/lambda)^(-1/gamma)))*((1-delta)*k_sim(t) + k_sim(t).^(alpha)-kp_sim(t));
+    c1_sim(t) = ((1-delta)*k_sim(t) + k_sim(t).^(alpha)-kp_sim(t)) - c2_sim(t);
 end
 
 

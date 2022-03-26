@@ -38,7 +38,7 @@ kgrid = linspace(k_low,k_high,T)';
 
 
 %% parametrize c1 using k
-coef = [c01_ss; 0.0001];
+coef = [log(c01_ss^(-gamma)); 0.0001];
 %% bound and update parameter
 update = 0.6;
 tol = 1e-5;
@@ -47,15 +47,13 @@ tol = 1e-5;
 % initialize lambda
 
 iter = 0;
-tol_search = 5.4e-05;
+tol_search = 1e-7;
 dif = Inf;
 err_dif = Inf;
+while dif > tol_search || err_dif > tol_search
 
-
-while err_dif > tol_search || dif > tol_search
-
-[err,coef] = model_error(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
-[err_b,~] = model_error(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
+[err,coef] = model_error_revision(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
+[err_b,~] = model_error_revision(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
     if abs(err) < tol_search
        return
     elseif sign(err) == sign(err_b)
@@ -64,7 +62,7 @@ while err_dif > tol_search || dif > tol_search
         a = lambda;
     end
     lambda = (a+b)/2;
-    dif = abs(err-err_b)
+    dif = abs(err - err_b)
     err_dif = abs(err)
     iter = iter +1;
     
@@ -76,10 +74,10 @@ sim_length = 500;
 c1_sim = zeros(sim_length,1);
 c2_sim = zeros(sim_length,1);
 k_sim = zeros(sim_length,1);
-k_sim(1,1) = 0.8*kss;
+k_sim(1,1) = kss;
 
 for t = 1:sim_length
-    c1_sim(t) = coef(1) + coef(2)*k_sim(t);
+    c1_sim(t) = exp(coef(1) + coef(2)*k_sim(t) + coef(3)*log(k_sim(t)))^(-1/gamma);
     c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma))^(-1/gamma);
     k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
 end
@@ -89,5 +87,4 @@ hold on
 plot(c1_sim)
 plot(c2_sim)
 hold off
-
 

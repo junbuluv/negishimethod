@@ -1,0 +1,20 @@
+function model_error(lambda, coef, kgrid, T, psi, update, tol, idx_psi)
+
+
+    c_1 = zeros(T,1);
+    c_2 = zeros(T,1);
+    kp = zeros(T,1);
+    e = zeros(T-1,1);
+
+    while dif > tol
+
+        c_1 = (coef[1] .+ coef[2]*log.(kgrid));
+        c_2 = ((lambda/(1-lambda)) .* c_1.^(gamma)).^(-1/gamma) ;
+        kp = (1-delta).*kgrid - (c_1 + c_2) + kgrid.^(alpha);
+        c_1p = c_1[2:end];
+
+        # fitting
+        e = (beta.* c_1p.^(-gamma).*(alpha*kp[1:end-1].^(alpha-1) .+ (1-delta))).^(-1/gamma);
+        X = [ones(T-1,1), log.(kgrid[1:end-1,1])];
+        L,U = lu(transpose(X) * X)
+        

@@ -1,4 +1,4 @@
-function [p_dif,coef] = model_error(lambda, coef, kgrid, param, T, psi, update, tol,idx_psi)
+function [p_dif,coef] = model_error_revision(lambda, coef, kgrid, param, T, psi, update, tol,idx_psi)
 
 alpha = param.alpha;
 beta = param.beta;
@@ -10,30 +10,24 @@ dif = Inf;
 iteration = 0;
 
 % initialize 
-c_1 = zeros(T,1);
-c_2 = zeros(T,1);
-kp = zeros(T,1);
-e = zeros(T,1);
 
 while dif > tol
 
-t = 1:1:T;
-c_1(t) = (coef(1) + coef(2).*kgrid(t));
-c_2(t) = ((lambda / (1-lambda)) .* c_1(t).^(-gamma) ).^(-1/gamma);
-kp(t) = (1-delta).*kgrid(t) - (c_1(t) + c_2(t)) + kgrid(t).^(alpha);
+c_1 = exp(coef(1) + coef(2).* log(kgrid)) .^(-1/gamma);
+c_2 = ((lambda/(1-lambda)).*c_1.^(-gamma)).^(-1/gamma);
+kp = (1-delta).*kgrid - (c_1 + c_2) + kgrid.^(alpha);
 
-c_1p = (coef(1) + coef(2).*kp(t));
+c_1p = exp(coef(1) + coef(2).* log(kp)).^(-1/gamma);
 
-
-e(t) = (beta.* c_1p(t).^(-gamma).*(alpha*kp(t).^(alpha-1) + (1-delta))).^(-1/gamma);
+e = (beta.* c_1p.^(-gamma).*(alpha.*kp.^(alpha-1) + (1-delta)));
 
 
-X = [ones(T,1), kgrid(1:end,1)];
+X = [ones(T,1), log(kgrid)];
 
-%zeta = nlinfit(X,e,'fit',coef);
-[L,U] = lu(X'*X);
-invXX = inv(U) * inv(L);
-zeta = invXX * X' * e;
+zeta = nlinfit(X,e,'object',coef);
+%[L,U] = lu(X'*X);
+%invXX = inv(U) * inv(L);
+%zeta = invXX * X' * e;
 
 dif = norm(coef - zeta);
 
@@ -49,8 +43,7 @@ end
 %% simulate
 c1_sim = zeros(T,1);
 c2_sim = zeros(T,1);
-k_sim = zeros(T,1);
-k_sim(1,1) = 0.8 * kss;
+k_sim = kgrid;
 n1_sim = 1/2;
 w_sim = zeros(T,1);
 r_sim = zeros(T,1);
@@ -59,7 +52,7 @@ p = zeros(T,1);
 ltbc = zeros(T,1);
 
 for t = 1:T
-    c1_sim(t) = coef(1) + coef(2)*k_sim(t);
+    c1_sim(t) = exp(coef(1) + coef(2)*log(k_sim(t)))^(-1/gamma);
     c2_sim(t) = ((lambda / (1-lambda)) * c1_sim(t)^(-gamma))^(-1/gamma);
     k_sim(t+1) = (1-delta)*k_sim(t) - (c1_sim(t) + c2_sim(t)) + k_sim(t)^(alpha);
     w_sim(t) = (1-alpha)*k_sim(t)^(alpha)*(nss)^(-alpha);
