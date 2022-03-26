@@ -4,7 +4,6 @@ alpha = param.alpha;
 beta = param.beta;
 gamma = param.gamma;
 delta = param.delta;
-kss = param.kss;
 nss = param.nss;
 dif = Inf;
 iteration = 0;
