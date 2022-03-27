@@ -55,16 +55,14 @@ err_dif = Inf;
 while dif > tol_search || err_dif > tol_search
 
 [err,coef] = model_error_revision(lambda, coef, kgrid, param, T, psi, update, tol, idx_psi);
-[err_b,~] = model_error_revision(b,coef,kgrid,param,T,psi,update,tol,idx_psi);
     if abs(err) < tol_search
        return
-    elseif sign(err) == sign(err_b)
-        b = lambda;
-    else
+    elseif err > 0
         a = lambda;
+    else
+        b = lambda;
     end
     lambda = (a+b)/2;
-    dif = abs(err - err_b);
     err_dif = abs(err)
     iter = iter +1;
     
