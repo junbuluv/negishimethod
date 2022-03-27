@@ -27,7 +27,7 @@ idx_psi = 4;
 
 
 %% Negishi problem
-T = 2500;
+T = 10000;
 
 a = 0.01;
 b = 0.99;

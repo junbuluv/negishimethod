@@ -64,5 +64,5 @@ for t = 1:T
     ltbc(t) = p(t)*(c1_sim(t) - w_sim(t)*(n1_sim));
 end
 
-p_dif = kgrid(1)*psi(idx_psi) - sum(ltbc);
+p_dif = kgrid(1)*psi(idx_psi) - sum(ltbc) - p(T) * k_sim(T+1);
 
