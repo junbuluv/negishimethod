@@ -21,7 +21,10 @@ param = struct("nss",nss,"kss",kss,"yss",yss,"css",css,"delta",delta, "beta", be
 
 %% psi
 psi = [0.2,0.5,0.7,0.9];
-idx_psi = 3;
+idx_psi = 4;
+
+
+
 
 %% Negishi problem
 T = 2500;
@@ -45,9 +48,8 @@ tol = 1e-5;
 
 %% Bisection search
 % initialize lambda
-
 iter = 0;
-tol_search = 2e-04;
+tol_search =  1.5e-04;
 dif = Inf;
 err_dif = Inf;
 while dif > tol_search || err_dif > tol_search
@@ -62,7 +64,7 @@ while dif > tol_search || err_dif > tol_search
         a = lambda;
     end
     lambda = (a+b)/2;
-    dif = abs(err - err_b)
+    dif = abs(err - err_b);
     err_dif = abs(err)
     iter = iter +1;
     
@@ -70,7 +72,7 @@ end
 
 
 
-sim_length = 1000;
+sim_length = 500;
 c1_sim = zeros(sim_length,1);
 c2_sim = zeros(sim_length,1);
 k_sim = zeros(sim_length,1);
@@ -83,7 +85,12 @@ for t = 1:sim_length
 end
 
 
+
 hold on
 plot(c1_sim)
 plot(c2_sim)
 hold off
+
+
+
+
