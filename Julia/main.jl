@@ -21,7 +21,7 @@ beta = 1.0 / ( (1.0-delta) + alpha * kss^(alpha-1.0));
 
 #psi selection
 psi = [0.2,0.5,0.7,0.9];
-idx_psi = 3;
+idx_psi = 2;
 z = 1.0;
 # Negishi problem
 sim_length = 12500;
@@ -36,10 +36,9 @@ k_high = 1.2 * kss;
 k = LinRange(k_low,k_high,sim_length);
 
 # parametrize c1 using k
-init = Vector{Float64}(undef,3);
+init = Vector{Float64}(undef,2);
 init[1] = c01_ss;
 init[2] = 0.0001;
-init[3] = 0.0001;
 # bound and update parameter
 update_param = 0.6;
 iter = 0;
@@ -51,10 +50,11 @@ ltbc_dif = Inf;
 while ltbc_dif > tol_search
 iteration = 0;
 ltbc_dif = model_error(init, lambda_init, tol_search, sim_length, k, update_param, alpha, nss, kss, psi, idx_psi);
+ltbc_dif_2 = model_error(init, a, tol_search, sim_length, k, update_param, alpha, nss, kss, psi, idx_psi);
 if ltbc_dif > 0
-    a = lambda_init;
-elseif ltbc_dif < 0 
     b = lambda_init;
+elseif ltbc_dif < 0 
+    a = lambda_init;
 end
 lambda_init = (a + b)/2
 ltbc_dif = abs(ltbc_dif)
